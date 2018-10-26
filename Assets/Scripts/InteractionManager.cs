@@ -37,6 +37,7 @@ public class InteractionManager : MonoBehaviour {
     public delegate void ActionDetermined(E_Action action, Interactable interactable);
     public ActionDetermined onActionDetermined;
 
+
     private void Awake()
     {
         instance = this;
@@ -55,13 +56,11 @@ public class InteractionManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        isDoubleTapped = Input.touches.Count(touch => touch.tapCount > 1) > 0;
+    }
 
-        if (InputProcessor.instance)
-            clickInputs = InputProcessor.instance.GetClickInputs();
-
-        if (clickInputs != null)
-            amountOfTouches = clickInputs.Count;
+    private void LateUpdate()
+    {
+        isDoubleTapped = false;
     }
 
     public void SetInteractionMode(E_InteractionMode interactionMode)
@@ -72,6 +71,12 @@ public class InteractionManager : MonoBehaviour {
     public void SetInteractable(Interactable interactable = null)
     {
         currentInteractable = interactable;
+
+        if (InputProcessor.instance)
+            clickInputs = InputProcessor.instance.GetClickInputs();
+
+        if (clickInputs != null)
+            amountOfTouches = clickInputs.Count;
 
         if (onActionDetermined != null)
             onActionDetermined(DetermineAction(), currentInteractable);
@@ -84,7 +89,6 @@ public class InteractionManager : MonoBehaviour {
 
     private void ClickRelease(Vector2 position)
     {
-        currentInteractionMode = E_InteractionMode.Undetermined;
         currentInteractable = null;
     }
 

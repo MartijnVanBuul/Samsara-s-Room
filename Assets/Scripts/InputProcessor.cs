@@ -57,12 +57,11 @@ public class InputProcessor : MonoBehaviour
     {
         isClickedThisFrame = false;
 
-        if (Input.GetMouseButtonDown(0))
-            ProcessClick(Input.mousePosition);
+        //if (Input.GetMouseButtonDown(0))
+        //    ProcessClick(Input.mousePosition);
 
-        if (Input.GetMouseButtonUp(0))
-            if (onClickRelease != null)
-                onClickRelease(Input.mousePosition);
+        //if (Input.GetMouseButtonUp(0))
+        //    Release(Input.mousePosition);
 
         foreach (Touch touch in Input.touches)
         {
@@ -94,19 +93,20 @@ public class InputProcessor : MonoBehaviour
 
         isClickedThisFrame = true;
 
-        if (onProcessClick != null)
-            onProcessClick(position);
-
         if (Time.realtimeSinceStartup - lastClickTime < doubleClickTime)
             if (onDoubleClick != null)
                 onDoubleClick(position);
+
+        if (onProcessClick != null)
+            onProcessClick(position);
 
         lastClickTime = Time.realtimeSinceStartup;
     }
 
     private void Release(Vector2 position, int id = -1)
     {
-        clickInputs.RemoveAt(clickInputs.FindIndex(touchInput => touchInput.FingerId == id));
+        if(clickInputs.FindIndex(touchInput => touchInput.FingerId == id) != -1)
+            clickInputs.RemoveAt(clickInputs.FindIndex(touchInput => touchInput.FingerId == id));
 
         if (onClickRelease != null)
             onClickRelease(position);

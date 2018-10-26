@@ -8,14 +8,16 @@ public class CameraNode : MonoBehaviour {
     public float Offset;
     public Vector2 MinimumRotation;
     public Vector2 MaximumRotation;
+    public Vector2 InitialRotation;
     public bool IsSelected;
+    public bool IsInteractable;
 
     [Header("Camera nodes")]
     public CameraNode NextNode;
     public CameraNode PreviousNode;
 
     private Vector2 initialRotation;
-    private Vector2 currentRotation;
+    private Vector3 currentRotation;
     private bool isDragging;
 
     private Vector2 currentDragSpeed;
@@ -36,9 +38,9 @@ public class CameraNode : MonoBehaviour {
             currentDragSpeed += InputProcessor.instance.GetDeltaPosition() / 50;
 
             if (Mathf.RoundToInt(MaximumRotation.x) - Mathf.RoundToInt(MinimumRotation.x) == 360)
-                currentRotation.x = currentRotation.x - InputProcessor.instance.GetDeltaPosition().y * rotationSpeed;
+                currentRotation.z = currentRotation.z - InputProcessor.instance.GetDeltaPosition().y * rotationSpeed;
             else
-                currentRotation.x = Mathf.Clamp(currentRotation.x - InputProcessor.instance.GetDeltaPosition().y * rotationSpeed, MinimumRotation.x, MaximumRotation.x);
+                currentRotation.z = Mathf.Clamp(currentRotation.z - InputProcessor.instance.GetDeltaPosition().y * rotationSpeed, MinimumRotation.x, MaximumRotation.x);
 
             if (Mathf.RoundToInt(MaximumRotation.y) - Mathf.RoundToInt(MinimumRotation.y) == 360)
                 currentRotation.y = currentRotation.y - InputProcessor.instance.GetDeltaPosition().x * rotationSpeed;
@@ -50,9 +52,9 @@ public class CameraNode : MonoBehaviour {
             currentDragSpeed *= 0.9f;
 
             if (Mathf.RoundToInt(MaximumRotation.x) - Mathf.RoundToInt(MinimumRotation.x) == 360)
-                currentRotation.x = currentRotation.x - currentDragSpeed.y;
+                currentRotation.z = currentRotation.z - currentDragSpeed.y;
             else
-                currentRotation.x = Mathf.Clamp(currentRotation.x - currentDragSpeed.y, MinimumRotation.x, MaximumRotation.x);
+                currentRotation.z = Mathf.Clamp(currentRotation.z - currentDragSpeed.y, MinimumRotation.x, MaximumRotation.x);
 
             if (Mathf.RoundToInt(MaximumRotation.y) - Mathf.RoundToInt(MinimumRotation.y) == 360)
                 currentRotation.y = currentRotation.y - currentDragSpeed.x;
@@ -67,23 +69,33 @@ public class CameraNode : MonoBehaviour {
     {
         if(CameraManager.instance && CameraManager.instance.currentNode != this)
             CameraManager.instance.SetCameraNode(this);
+
+        currentRotation = InitialRotation;
     }
 
     void OnDrawGizmosSelected()
     {
-        Gizmos.color = new Color(1, 1, 1, 0.75F);
-        Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler(MinimumRotation.x, MinimumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * transform.eulerAngles);
-        Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler(MinimumRotation.x, MaximumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * transform.eulerAngles);
-        Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler(MaximumRotation.x, MaximumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * transform.eulerAngles);
-        Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler(MaximumRotation.x, MinimumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * transform.eulerAngles);
-        Gizmos.DrawLine(transform.position + Quaternion.Euler(MaximumRotation.x, MinimumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward, transform.position + Quaternion.Euler(MinimumRotation.x, MinimumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward);
-        Gizmos.DrawLine(transform.position + Quaternion.Euler(MinimumRotation.x, MinimumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward, transform.position + Quaternion.Euler(MinimumRotation.x, MaximumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward);
-        Gizmos.DrawLine(transform.position + Quaternion.Euler(MinimumRotation.x, MaximumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward, transform.position + Quaternion.Euler(MaximumRotation.x, MaximumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward);
-        Gizmos.DrawLine(transform.position + Quaternion.Euler(MaximumRotation.x, MaximumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward, transform.position + Quaternion.Euler(MaximumRotation.x, MinimumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward);
+        Gizmos.color = new Color(1, 0, 0, 0.75F);
+        Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler(MinimumRotation.x, MinimumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward * Offset);
+        Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler(MinimumRotation.x, MaximumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward * Offset);
+        Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler(MaximumRotation.x, MaximumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward * Offset);
+        Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler(MaximumRotation.x, MinimumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward * Offset);
+        Gizmos.color = new Color(1, 0.2f, 0.2f, 0.75F);
+        Gizmos.DrawLine(transform.position + Quaternion.Euler(MaximumRotation.x, MinimumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward * Offset, transform.position + Quaternion.Euler(MinimumRotation.x, MinimumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward * Offset);
+        Gizmos.DrawLine(transform.position + Quaternion.Euler(MinimumRotation.x, MinimumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward * Offset, transform.position + Quaternion.Euler(MinimumRotation.x, MaximumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward * Offset);
+        Gizmos.DrawLine(transform.position + Quaternion.Euler(MinimumRotation.x, MaximumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward * Offset, transform.position + Quaternion.Euler(MaximumRotation.x, MaximumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward * Offset);
+        Gizmos.DrawLine(transform.position + Quaternion.Euler(MaximumRotation.x, MaximumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward * Offset, transform.position + Quaternion.Euler(MaximumRotation.x, MinimumRotation.y, 0) * Quaternion.AngleAxis(0, Vector3.up) * Vector3.forward * Offset);
+        Gizmos.color = new Color(0, 1, 0, 0.75F);
 
+        Gizmos.DrawLine(transform.position, transform.position + (Vector3)InitialRotation * Offset);
+
+    }
+
+    private void OnDrawGizmos()
+    {
         Gizmos.color = Color.blue;
-        
-        if( NextNode)
+
+        if (NextNode)
             Gizmos.DrawLine(transform.position, NextNode.transform.position);
 
         if (PreviousNode)
@@ -94,28 +106,37 @@ public class CameraNode : MonoBehaviour {
     {
         IsSelected = selected;
 
-        if (IsSelected && InputProcessor.instance)
+        if (IsSelected && InputProcessor.instance && InteractionManager.instance)
         {
-            //InputProcessor.instance.onClick += OnClick;
-            //InputProcessor.instance.onClickRelease += OnClickRelease;
+            InteractionManager.instance.onActionDetermined += ActionDetermined;
+            InputProcessor.instance.onClickRelease += OnClickRelease;
 
         }
         else
         {
-            //InputProcessor.instance.onClick -= OnClick;
-            //InputProcessor.instance.onClickRelease -= OnClickRelease;
+            InteractionManager.instance.onActionDetermined -= ActionDetermined;
+            InputProcessor.instance.onClickRelease -= OnClickRelease;
         }
     }
 
-    private void OnClick(Vector2 clickPosition)
-    {
-        currentDragSpeed = Vector2.zero;
-        initialRotation = transform.GetChild(0).localEulerAngles;
-        isDragging = true; ;
-    }
 
     private void OnClickRelease(Vector2 clickPosition)
     {
         isDragging = false;
+    }
+
+    private void ActionDetermined(E_Action action, Interactable interactable)
+    {
+        Debug.Log(action.ToString());
+        if(action == E_Action.Rotate)
+        {
+            currentDragSpeed = Vector2.zero;
+            initialRotation = transform.GetChild(0).localEulerAngles;
+            isDragging = true; ;
+        }
+        else
+        {
+            isDragging = false;
+        }
     }
 }

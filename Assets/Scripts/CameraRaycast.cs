@@ -40,6 +40,7 @@ public class CameraRaycast : MonoBehaviour
                     if (Physics.Raycast(screenPointToPosition.origin, screenPointToPosition.direction, out hit, Mathf.Infinity))
                     {
                         var hitCollider = hit.collider.GetComponent<Interactable>();
+
                         if (InteractionManager.instance)
                             InteractionManager.instance.SetInteractable(hitCollider);
                     }
